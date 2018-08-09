@@ -1,5 +1,6 @@
 #Users if this contract get ether and amount of ether is enought variable singup become true for particular address
 
+
 Users: public({
     project: bool, # why bool? address? - 
   #	project_address: address,
@@ -29,6 +30,14 @@ nextUserStoryID:int128
 nextProjectID:int128
 #id of UserList
 nextUserListID:int128
+  
+#initial variables
+darf2eth: int128 = 500
+token_share: decimal = 0.05
+DARF_share: decimal = 0.05
+decide_vote: decimal = 0.51
+
+
 
   
 UserList:
@@ -37,8 +46,7 @@ UserList:
    UserStoryID:int128
    }[int128])
 
-# A list of the owners addresses (there are a maximum of 5 owners)
-owners: public(address[5])
+
 
 UserStory: public({
     projectID:int128,
@@ -66,18 +74,16 @@ def signup_check() -> bool:
 @public
 @payable
 def __default__():
-# check what's been sent (DARF or ETH) 
-# if ETh...
-    if self.signup_check():
-        self.ether_depo += msg.value
-        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*500))
+	check_result: bool = self.Users[msg.sender].signup
+    if check_result:
+        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*darf2eth))
+        self.ether_depo = self.ether_depo + msg.value
     else:
-        #return darf - (ether = 20 or 10 darf)
-        #send this amount of ether to beneficiar address
-        #write all information to Users
         self.Users[msg.sender].signup = True
-        self.Users[msg.sender].project = True
-# if DARF...
+        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*darf2eth-10))
+        
+        
+	#2do if DARF inbcome...
 
 
 @public
@@ -91,6 +97,15 @@ def create_project(owner_address: address,token:address,IPFSDescribe:bytes32):
     ProjectID: int128 = self.nextProjectID
     self.Projects[ProjectID] = {projectID:ProjectID, project_owner_address:owner_address,  IPFSDescribe:IPFSDescribe}
     self.nextProjectID = ProjectID + 1
+    
+@public
+def checkrights(): #check access rights to project
+   
+
+@public
+def setrights () : # set grade of rights for project 
+# как увязать ИД  группу Оду и грейд прав?
+
 
 @public
 def change_project_info(ProjectID:int128, NewIPFSDescribe:bytes32):
@@ -156,8 +171,10 @@ def confirm_end_from_user(UserStoryID:int128): # investors accept work
     assert self.UserStory[UserStoryID].user_address != msg.sender
     ProjectID: int128 = self.UserStory[UserStoryID].projectID
     project_address: address = self.Projects[ProjectID].project_owner_address
-    storyAmountDarf: uint256 = self.UserStory[UserStoryID].StoryAmountDarf/100*95
-    FullStoryAmountDarf: uint256 = self.UserStory[UserStoryID].StoryAmountDarf/100*95
+    storyAmountDarf: uint256 = self.UserStory[UserStoryID].StoryAmountDarf*(1.0-self.DARFshare)
+    FullStoryAmountDarf: uint256 = self.UserStory[UserStoryID].StoryAmountDarf*(1.0-self.DARFshare)
+	# tokens 2 user
+    
     self.UserStory[UserStoryID].confirm_end_from_user = True
     self.darftoken.transfer(project_address, as_unitless_number(storyAmountDarf))
     self.ether_depo = self.ether_depo - as_wei_value(FullStoryAmountDarf/500, "wei")
@@ -166,9 +183,14 @@ def confirm_end_from_user(UserStoryID:int128): # investors accept work
 # if team fails... deadline is broken, undersing LT then 50% of sum and one on investors initiate refunding 
 def userstory_fail_refund (UserStoryID):
     assert self.UserStory[UserStoryID].user_address != msg.sender
-    PH: {
-      UserStoryID: int128,
-      Payment: int128,
-      UserAddress: address
-    }
-    
+    if block.timestamp > self.UserStory[UserStoryID].start_date + self.UserStory[UserStoryID].duration : #deadline is broken
+      	if 
+      
+def change_conditions (darf2Eth, TokenShare, DARFShare):
+  assert self.beneficiar != msg.sender
+  self.darf2eth = darf2Eth
+  self.token_share = TokenShare
+  self.DARF_share = DARFShare
+
+
+
