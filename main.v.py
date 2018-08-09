@@ -84,7 +84,23 @@ def __default__():
         
         
 	#2do if DARF inbcome...
+	#check sender's balance DARF
+        #  check Eth balance on smart contract
+        #send Eth
 
+@public
+@payable
+def exchangeDARF2ETH (sum_DARF:wei):
+  	if (self.darftoken.balanceOf(msg.sender)>sum_DARF) and (darftoken.balanceOf(self.address)):
+       	check_result: bool = self.Users[msg.sender].signup
+        if check_result:
+            self.send(msg.sender, as_unitless_number(msg.value/darf2eth))
+            self.ether_depo = self.ether_depo - msg.value/darf2eth
+        else:
+            self.Users[msg.sender].signup = True
+            self.darftoken.transfer(msg.sender, as_unitless_number(msg.value/darf2eth-10))                                                 
+
+ 
 
 @public
 def get_ballance_of_depo() -> uint256(wei):
