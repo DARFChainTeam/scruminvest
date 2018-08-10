@@ -32,10 +32,10 @@ nextProjectID:int128
 nextUserListID:int128
   
 #initial variables
-darf2eth: int128 = 500
-token_share: decimal = 0.05
-DARF_share: decimal = 0.05
-decide_vote: decimal = 0.51
+darf2eth: int128
+token_share: decimal
+DARF_share: decimal
+decide_vote: decimal
 
 
 
@@ -65,6 +65,13 @@ UserStory: public({
         }[int128])
 
 @public
+def __init__(darf2eth_start:int128, token_share_start:decimal, DARF_share_start:decimal,decide_vote_start:decimal):
+    self.darf2eth = darf2eth_start
+    self.token_share = token_share_start
+    self.DARF_share = DARF_share_start
+    self.decide_vote = decide_vote_start
+  
+@public
 def signup_check() -> bool:
     check_result: bool = False
     if self.Users[msg.sender].signup:
@@ -74,20 +81,16 @@ def signup_check() -> bool:
 @public
 @payable
 def __default__():
-	check_result: bool = self.Users[msg.sender].signup
+  	check_result: bool = self.Users[msg.sender].signup
     if check_result:
-        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*darf2eth))
+        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*self.darf2eth))
         self.ether_depo = self.ether_depo + msg.value
     else:
         self.Users[msg.sender].signup = True
-        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*darf2eth-10))
+        self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*self.darf2eth-10))
         
         
 	#2do if DARF inbcome...
-	#check sender's balance DARF
-        #  check Eth balance on smart contract
-        #send Eth
-
 @public
 @payable
 def exchangeDARF2ETH (sum_DARF:wei):
@@ -100,7 +103,9 @@ def exchangeDARF2ETH (sum_DARF:wei):
             self.Users[msg.sender].signup = True
             self.darftoken.transfer(msg.sender, as_unitless_number(msg.value/darf2eth-10))                                                 
 
- 
+    #check sender's balance DARF
+    #check Eth balance on smart contract
+    #send Eth
 
 @public
 def get_ballance_of_depo() -> uint256(wei):
@@ -113,6 +118,8 @@ def create_project(owner_address: address,token:address,IPFSDescribe:bytes32):
     ProjectID: int128 = self.nextProjectID
     self.Projects[ProjectID] = {projectID:ProjectID, project_owner_address:owner_address,  IPFSDescribe:IPFSDescribe}
     self.nextProjectID = ProjectID + 1
+    #  deploy new project instance ? 
+
     
 @public
 def checkrights(): #check access rights to project
@@ -130,6 +137,10 @@ def change_project_info(ProjectID:int128, NewIPFSDescribe:bytes32):
     
 @public
 def start_user_story(projectID:int128,IPFSHash:bytes32,storyAmountDarf:uint256): # initiation of userstory
+      # Для регистрации истории он посылает на смарт-контракт символическую сумму 1 ДАРФ
+
+	# В смарт-контракте фиксируется адрес (ID) истории
+    #  deploy new userstory  instance ? 
     assert self.Users[msg.sender].signup == True
     UserStoryID: int128 = self.nextUserStoryID
     self.UserStory[UserStoryID] = {projectID:projectID,
@@ -197,16 +208,17 @@ def confirm_end_from_user(UserStoryID:int128): # investors accept work
     # 5% tokens & ETH to us
     
 # if team fails... deadline is broken, undersing LT then 50% of sum and one on investors initiate refunding 
-def userstory_fail_refund (UserStoryID):
+def userstory_fail_refund (UserStoryID: int128):
     assert self.UserStory[UserStoryID].user_address != msg.sender
     if block.timestamp > self.UserStory[UserStoryID].start_date + self.UserStory[UserStoryID].duration : #deadline is broken
-      	if 
+        if self.UserStory[UserStoryID].confirm_end_from_user != True:
+          
       
 def change_conditions (darf2Eth, TokenShare, DARFShare):
-  assert self.beneficiar != msg.sender
-  self.darf2eth = darf2Eth
-  self.token_share = TokenShare
-  self.DARF_share = DARFShare
+    assert self.beneficiar != msg.sender
+    self.darf2eth = darf2Eth
+    self.token_share = TokenShare
+    self.DARF_share = DARFShare
 
 
 
