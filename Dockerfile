@@ -4,6 +4,8 @@ FROM python:3.6-slim
 # Specify label-schema specific arguments and labels.
 ARG BUILD_DATE
 ARG VCS_REF
+ARG WORKPATH
+
 LABEL org.label-schema.build-date=$BUILD_DATE \
     org.label-schema.name="Vyper" \
     org.label-schema.description="Vyper is an experimental programming language" \
@@ -26,7 +28,7 @@ RUN pip install eth-utils==0.8.1 web3==3.16.5
 RUN pip install git+git://github.com/ethereum/vyper.git
 RUN  apt-get purge -y --auto-remove apt-utils gcc libc6-dev libc-dev libssl-dev pkg-config autoconf automake apt-utils libtool-bin libsecp256k1-dev
 
-ADD . /code
+ADD $WORKPATH  /code
 
 WORKDIR /code
 
