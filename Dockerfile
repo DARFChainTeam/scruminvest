@@ -15,11 +15,16 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
 
 # coincurve requires libgmp
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends apt-utils gcc libc6-dev libc-dev libssl-dev libgmp-dev pkg-config autoconf automake apt-utils libtool-bin libsecp256k1-dev git  && \
+    apt-get install -y --no-install-recommends apt-utils gcc libc6-dev libc-dev libssl-dev libgmp-dev pkg-config autoconf automake apt-utils libtool-bin libsecp256k1-dev git mc  && \
     rm -rf /var/lib/apt/lists/*
 RUN pip install populus
+
+# spike for Populus Compile Error : "Force_Text"
+RUN pip install eth-utils==0.8.1 web3==3.16.5
+
+
 RUN pip install git+git://github.com/ethereum/vyper.git
-#RUN  apt-get purge -y --auto-remove apt-utils gcc libc6-dev libc-dev libssl-dev pkg-config autoconf automake apt-utils libtool-bin libsecp256k1-dev
+RUN  apt-get purge -y --auto-remove apt-utils gcc libc6-dev libc-dev libssl-dev pkg-config autoconf automake apt-utils libtool-bin libsecp256k1-dev
 
 ADD . /code
 
