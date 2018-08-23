@@ -12,16 +12,16 @@ Users: public({
 Projects: public({
     projectID: int128,
     project_owner_address: address,
-    project_token: address(ERC20),
+    project_token: address, #(ERC20)?
     IPFSDescribe: bytes32, # address of project in IPFS
     }[int128])
 
 # Depo for user's ethers
 ether_depo:public(wei_value)
 #Token Darf
-darftoken:address(ERC20)
+darftoken:address #(ERC20)
 #project's token
-projecttoken:address(ERC20)
+projecttoken:address #(ERC20)
 #Адресс куда будут перечилятся денежки
 beneficiar:address
 #id of UserStory
@@ -41,7 +41,7 @@ decide_vote: decimal
 
   
 UserList: ({
-   address:address,
+   user_address:address, #2do find where used address from Userlist
    summa:wei_value,
    UserStoryID:int128
    }[int128])
@@ -65,22 +65,23 @@ UserStory: public({
     }[int128])
   
 GroupRights: public({
-     floor_sum:wei,
+     floor_sum:wei_value,
      }[int128])
 
-rights_set: GroupRights
+# rights_set: GroupRights
 
-@public
-def __init__(darf2eth_start:int128, token_share_start:decimal, DARF_share_start:decimal,decide_vote_start:decimal, projecttoken:address(ERC20)):
+@public 
+def __init__(darf2eth_start:int128, token_share_start:decimal, DARF_share_start:decimal,decide_vote_start:decimal, thisprojecttoken:address):
     self.darf2eth = darf2eth_start
     self.token_share = token_share_start
     self.DARF_share = DARF_share_start
     self.decide_vote = decide_vote_start
-    self.projecttoken = projecttoken
+    self.projecttoken = thisprojecttoken
   
 @public
 def signup_check() -> bool:
-    check_result: bool = False
+    check_result: bool 
+    check_result = False
     if self.Users[msg.sender].signup:
         check_result = True
     return check_result
@@ -91,8 +92,8 @@ def __default__():
     assert (self.darftoken.balanceOf(self.address) < msg.value*self.darf2eth)
         # 2do add logging insufficient DARF
 
-    check_result: bool = self.Users[msg.sender].signup
-    if check_result:
+    # check_result: bool = self.Users[msg.sender].signup
+    if self.Users[msg.sender].signup: # check_result:
         self.darftoken.transfer(msg.sender, as_unitless_number(msg.value*self.darf2eth))
         self.ether_depo = self.ether_depo + msg.value
     else:
@@ -106,10 +107,10 @@ def __default__():
 #send Eth
 @public
 @payable
-def exchangeDARF2ETH (sum_DARF:wei):
+def exchangeDARF2ETH (sum_DARF:wei_value):
     if (self.darftoken.balanceOf(msg.sender)>sum_DARF) and (s.balanceOf(self.address)):
-        check_result: bool = self.Users[msg.sender].signup
-        if check_result:
+        # check_result: bool = self.Users[msg.sender].signup
+        if self.Users[msg.sender].signup : #check_result:
             self.send(msg.sender, as_unitless_number(msg.value/darf2eth))
             self.ether_depo = self.ether_depo - msg.value/darf2eth
         else:
@@ -258,7 +259,7 @@ def userstory_fail_refund (UserStoryID: int128):
     if block.timestamp > self.UserStory[UserStoryID].start_date + self.UserStory[UserStoryID].duration : #deadline is broken
         if self.UserStory[UserStoryID].confirm_end_from_user != True:
             # 2DO what do u mean here?
-            return
+            return # ?? or...
 
 def change_conditions (darf2Eth, TokenShare, DARFShare):
     assert self.beneficiar != msg.sender
